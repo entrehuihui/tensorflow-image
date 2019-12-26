@@ -1,0 +1,14 @@
+node_modules
+target
+angular.json
+log/*
+css/*.css
+data
+test
+train
+result
+validation
+mymodel.h5
+mymodel.json
+*.jpg
+*.png

@@ -22,6 +22,7 @@ def plotImages(images_arr):
 
 
 def createmodel(train, validation):
+    # 训练模型
     batch_size = 128
 
     epochs = 15
@@ -54,6 +55,8 @@ def createmodel(train, validation):
     # exit(0)
     total_train = len(next(train_data_gen))
     total_val = len(next(val_data_gen))
+    print(total_train, total_val)
+    # return
     # augmented_images = [train_data_gen[0][0][0] for i in range(5)]
     # plotImages(augmented_images)
 
@@ -83,10 +86,12 @@ def createmodel(train, validation):
     # 使用课程的fit_generator方法ImageDataGenerator来训练网络
     history = model.fit_generator(
         train_data_gen,
-        steps_per_epoch=total_train,
+        # steps_per_epoch=total_train,
+        steps_per_epoch=batch_size,
         epochs=epochs,
         validation_data=val_data_gen,
-        validation_steps=total_val
+        # validation_steps=total_val
+        validation_steps=batch_size,
     )
 
     # 保存模型
@@ -142,17 +147,18 @@ def dictToArray(dict):
     return arr
 
 
-def predict():
+def predict(imagesfile):
+    # 识别
     dict = readjson("result/mymodel.json")
     IMG_HEIGHT = dict["IMG_HEIGHT"]
     IMG_WIDTH = dict["IMG_WIDTH"]
     batch_size = dict["batch_size"]
     namearray = dictToArray(dict["class_indices"])
 
-    model = keras.models.load_model('mymodel.h5')
+    model = keras.models.load_model('result/mymodel.h5')
     model.summary()
 
-    image = tf.io.read_file("1.jpg")
+    image = tf.io.read_file(imagesfile)
     image = tf.image.decode_jpeg(image, channels=3)
     image = tf.image.resize(image, [IMG_HEIGHT, IMG_WIDTH])
     image /= 255.0  # normalize to [0,1] range
@@ -171,8 +177,9 @@ def predict():
     print(name)
 
 
-createmodel("train", "validation")
+# createmodel("train", "validation")
 
 
 # createmodel("data", "test")
-# predict()
+predict("1.jpg")
+predict("2.jpg")

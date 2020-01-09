@@ -8,6 +8,7 @@ from tensorflow import keras
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import pyautogui
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 
@@ -147,7 +148,18 @@ def dictToArray(dict):
     return arr
 
 
-def predict(imagesfile):
+def reading(imagesfile, IMG_HEIGHT, IMG_WIDTH):
+    image = tf.io.read_file(imagesfile)
+    image = tf.image.decode_jpeg(image, channels=3)
+    image = tf.image.resize(image, [IMG_HEIGHT, IMG_WIDTH])
+    image /= 255.0  # normalize to [0,1] range
+
+    x = np.zeros((1, IMG_HEIGHT, IMG_WIDTH, 3), dtype='float64')
+    x[0] = image
+    return x
+
+
+def predict(imagesfiles):
     # 识别
     dict = readjson("result/mymodel.json")
     IMG_HEIGHT = dict["IMG_HEIGHT"]
@@ -157,29 +169,21 @@ def predict(imagesfile):
 
     model = keras.models.load_model('result/mymodel.h5')
     model.summary()
+    for imagesfile in imagesfiles:
+        x = reading(imagesfile, IMG_HEIGHT, IMG_WIDTH)
+        predictions = model.predict(x, batch_size=batch_size)
 
-    image = tf.io.read_file(imagesfile)
-    image = tf.image.decode_jpeg(image, channels=3)
-    image = tf.image.resize(image, [IMG_HEIGHT, IMG_WIDTH])
-    image /= 255.0  # normalize to [0,1] range
+        print(predictions)
 
-    x = np.zeros((1, IMG_HEIGHT, IMG_WIDTH, 3), dtype='float64')
-    x[0] = image
-
-    predictions = model.predict(x, batch_size=batch_size)
-
-    print(predictions)
-
-    name = []
-    for prediction in predictions:
-        index = np.argsort(-prediction)[0]
-        name.append(namearray[index])
-    print(name)
+        name = []
+        for prediction in predictions:
+            index = np.argsort(-prediction)[0]
+            name.append(namearray[index])
+        print(name)
+    pass
 
 
 # createmodel("train", "validation")
 
-
 # createmodel("data", "test")
-predict("1.jpg")
-predict("2.jpg")
+predict(["2.jpg", "1.jpg"])

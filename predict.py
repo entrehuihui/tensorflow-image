@@ -46,12 +46,7 @@ def predict(imagesfiles):
     for imagesfile in imagesfiles:
         x = reading(imagesfile, IMG_HEIGHT, IMG_WIDTH)
         predictions = model.predict(x, batch_size=batch_size)
-        # print("%f" % predictions[0][0])
-        for prediction in predictions:
-            index = np.argsort(-prediction)[0]
-            print(namearray[index])
-            result.append(namearray[index])
-
+        result.append(np.argmax(predictions))
     return result
 
 
@@ -68,7 +63,7 @@ def screenshot():
     return x
 
 
-result = predict(["2.jpg", "1.jpg"])
-# print(result)
+result = predict(["2.jpg", "1.jpg", "2.jpg"])
+print(result)
 
 screenshot()
